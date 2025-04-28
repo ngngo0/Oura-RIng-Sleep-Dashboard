@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Sleep Proj Dashboard</title>
+        <meta name="description" content="To visualize Oura Data">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <script src="script.js" async defer></script>
+        <aside>
+            <div id="logo"><p>Left side bar</p> </div>
+            
+            <ul id="ring-nav">
+                <li id="all-rings" class="selected"><a>All Rings</a></li>
+                <li><a href="/ring1">Ring 1</a></li>
+                <li><a>Ring 2</a></li>
+                <li><a>Ring 3</a></li>
+                <li><a>Ring 4</a></li>
+                <li><a>Ring 5</a></li>
+                <li><a>Ring 6</a></li>
+                <li><a>Ring 7</a></li>
+                <li><a>Ring 8</a></li>
+                <li><a>Ring 9</a></li>
+                <li><a>Ring 10</a></li>
+            </ul>
+        </aside>
+        <main>
+            <h1>Main dashboard</h1>
+            <section>
+                <p>Date Range:<br></p>
+                <div class="graph-header">
+                    <form>
+                        <input id="from-date" name="from-date" value="2025-04-18" type="date">
+                        <span> - </span>
+                        <input id="to-date" name="to-date" type="date" max="">
+                        <input type="submit" value="Send Request">
+                    </form>
+                    <div class="dropdown">
+                        <button class="dropbtn">Download As...</button>
+                        <div class="dropdown-content">
+                          <a href="#">CSV</a>
+                          <a href="#">JSON</a>
+                        </div>
+                    </div>
+                </div>
+                <pre id="message"></pre>
+                
+            </section>
+
+        </main>
+    </body>
+</html>
