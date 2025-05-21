@@ -1,1 +1,35 @@
 node_modules/
+.env
+# Logs
+oura-ring-sleep-dashboard/logs
+oura-ring-sleep-dashboard/*.log
+oura-ring-sleep-dashboard/npm-debug.log*
+oura-ring-sleep-dashboard/yarn-debug.log*
+oura-ring-sleep-dashboard/yarn-error.log*
+oura-ring-sleep-dashboard/pnpm-debug.log*
+oura-ring-sleep-dashboard/lerna-debug.log*
+
+oura-ring-sleep-dashboard/node_modules
+oura-ring-sleep-dashboard/.DS_Store
+oura-ring-sleep-dashboard/dist
+oura-ring-sleep-dashboard/dist-ssr
+oura-ring-sleep-dashboard/coverage
+oura-ring-sleep-dashboard/*.local
+
+oura-ring-sleep-dashboard//cypress/videos/
+oura-ring-sleep-dashboard//cypress/screenshots/
+
+# Editor directories and files
+oura-ring-sleep-dashboard/.vscode/*
+oura-ring-sleep-dashboard/!.vscode/extensions.json
+oura-ring-sleep-dashboard/.idea
+oura-ring-sleep-dashboard/*.suo
+oura-ring-sleep-dashboard/*.ntvs*
+oura-ring-sleep-dashboard/*.njsproj
+oura-ring-sleep-dashboard/*.sln
+oura-ring-sleep-dashboard/*.sw?
+
+oura-ring-sleep-dashboard/*.tsbuildinfo
+
+oura-ring-sleep-dashboard/test-results/
+oura-ring-sleep-dashboard/playwright-report/

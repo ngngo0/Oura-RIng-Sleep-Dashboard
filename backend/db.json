@@ -1,0 +1,68 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "nickname": "us",
+      "email": "user1@exaple.com",
+      "notes": "First pers",
+      "PAT":"123"
+    },
+    {
+      "id": 2,
+      "nickname": "use",
+      "email": "user2@example.com",
+      "notes": "Secon"
+    },
+    {
+      "id": 3,
+      "nickname": "user3",
+      "email": "user3@example.com",
+      "notes": "Third user"
+    },
+    {
+      "id": 4,
+      "nickname": "user4",
+      "email": "user4@example.com",
+      "notes": "Fourth user"
+    },
+    {
+      "id": 5,
+      "nickname": "user5",
+      "email": "user5@example.com",
+      "notes": "Fifth user"
+    },
+    {
+      "id": 6,
+      "nickname": "user6",
+      "email": "user6@example.com",
+      "notes": "Sixth user"
+    },
+    {
+      "id": 7,
+      "nickname": "user7",
+      "email": "user7@example.com",
+      "notes": "Seventh user"
+    },
+    {
+      "id": 8,
+      "nickname": "user8",
+      "email": "user8@example.com",
+      "notes": "Eighth user"
+    },
+    {
+      "id": 9,
+      "nickname": "user9",
+      "email": "user9@example.com",
+      "notes": "Ninth user"
+    },
+    {
+      "id": 10,
+      "nickname": "user10",
+      "email": "user10@example.com",
+      "notes": "Tenth user"
+    }
+  ],
+  "preferences":{
+    "csvVisibleColumns": ""
+  }
+}
