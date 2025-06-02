@@ -1,3 +1,7 @@
+Tasks 5/27
+- Default name for exports(json/csv) should be "ringId - start date - end date"
+- adding graphs --> adding an export button for each graph (png + svg/eps/pdf)
+
 Tasks 4/28/25 meeting
 ---
 1. user management for the rings (id/email/notes/API Ring information);
