@@ -1,3 +1,6 @@
+6/23
+- You cant access the oura ring api without a membership. so just know that you'll have to do that. The alternative is to request your past data, which they will respond to within 48 hours.
+
 Taskss 6/2
 - One big graph, checkboxes,
 - restrict axis-es??

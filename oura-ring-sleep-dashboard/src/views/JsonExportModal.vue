@@ -192,10 +192,12 @@ export default {
             type: Array,
             required: true,
         },
+        fromDate: { type: String, required: false },
+        toDate: { type: String, required: false },
+        selectedRing: { type: String, required: false },
     },
     data() {
         return {
-            filename: "sleep-data",
             visibleColumns: [],
             flashingRowIndex: null,
         };
@@ -213,6 +215,12 @@ export default {
                 });
                 return filteredRow;
             });
+        },
+        filename() {
+            const from = this.fromDate || 'start';
+            const to = this.toDate || 'end';
+            const ringId = this.selectedRing || 'ringId';
+            return `${ringId}-${from}-${to}`;
         },
     },
     watch: {

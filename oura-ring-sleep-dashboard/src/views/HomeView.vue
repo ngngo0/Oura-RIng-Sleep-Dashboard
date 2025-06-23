@@ -37,14 +37,27 @@
         Export CSV
       </button>
 
-      <CsvExportModal v-if="showModal" :jsonData="sleepData" @close="showModal = false" />
+      <CsvExportModal 
+        v-if="showModal" 
+        :jsonData="sleepData" 
+        :toDate="toDate"
+        :fromDate="fromDate"
+        :selectedRing="selectedRing"
+        @close="showModal = false" 
+      />
 
       <button @click="showJsonModal = true" :disabled="!sleepData || sleepData.length === 0"
         :title="(!sleepData || sleepData.length === 0) ? 'Generate data to enable export' : ''" class="btn btn-export">
         Export JSON
       </button>
 
-      <JsonExportModal v-if="showJsonModal" :jsonData="sleepData" @close="showJsonModal = false" />
+      <JsonExportModal v-if="showJsonModal" 
+        :jsonData="sleepData" 
+        :toDate="toDate"
+        :fromDate="fromDate"
+        :selectedRing="selectedRing"
+        @close="showJsonModal = false" 
+        />
     </div>
 
     <ChartComponent v-if="showChart" :chartType="chartType" />
@@ -69,7 +82,6 @@ export default {
   data() {
     return {
       fromDate: '2025-04-18',
-      toDate: '',
       selectedRing: 'all',
       allRingData: [
         { nickname: 'Ring1', email: 'aaaaaa@gmail.com', notes: '', apiId: 1 },
@@ -195,8 +207,12 @@ export default {
       this.rawJsonMsg = JSON.stringify(this.sleepData, null, 2);
       this.showChart = true;
     }
+  },
+  computed: {
+    toDate(){
+      return new Date().toISOString().slice(0, 10);
+    }
   }
-
 };
 </script>
 
