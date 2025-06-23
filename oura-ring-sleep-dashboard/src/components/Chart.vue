@@ -1,7 +1,25 @@
 <template>
+    <div class="metric-selector">
+      <label v-for="metric in ['rem', 'deep', 'total', 'score']" :key="metric">
+        <input
+          type="checkbox"
+          :value="metric"
+          v-model="selectedMetrics"
+        />
+        {{ getMetricLabel(metric) }}
+      </label>
+    </div>
     <canvas ref="chartRef"></canvas>
 </template>
+<style scoped>
+.metric-selector {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
 
+</style>
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import { useSleepStore } from '@/stores/sleepStore'
@@ -18,6 +36,8 @@ const props = defineProps<{
 Chart.register(...registerables)
 const chartRef = ref<HTMLCanvasElement | null>(null)
 let chartInstance: Chart | null = null
+
+const selectedMetrics = ref<string[]>(['rem'])
 
 const sleepStore = useSleepStore()
 
@@ -42,22 +62,30 @@ function getMetricLabel(metric: string): string {
 }
 
 function createChartConfig(type: ChartType): ChartConfiguration {
-    const labels = sleepStore.sleepData.map(r => r.day)
-    const data = sleepStore.sleepData.map(r => getMetricData(props.metric, r))
+    const labels = sleepStore.sleepData.map(r => r.day);
+
+    const colors: Record<string, { border: string, background: string }> = {
+        rem: { border: 'rgba(75, 192, 192, 1)', background: 'rgba(75, 192, 192, 0.2)' },
+        deep: { border: 'rgba(54, 162, 235, 1)', background: 'rgba(54, 162, 235, 0.2)' },
+        total: { border: 'rgba(255, 206, 86, 1)', background: 'rgba(255, 206, 86, 0.2)' },
+        score: { border: 'rgba(255, 99, 132, 1)', background: 'rgba(255, 99, 132, 0.2)' },
+    };
+
+    const datasets = selectedMetrics.value.map(metric => ({
+        label: getMetricLabel(metric),
+        data: sleepStore.sleepData.map(r => getMetricData(metric, r)),
+        borderColor: colors[metric].border,
+        backgroundColor: colors[metric].background,
+        fill: true,
+        tension: 0.3,
+        pointRadius: 3
+    }));
 
     return {
         type,
         data: {
             labels,
-            datasets: [{
-                label: getMetricLabel(props.metric),
-                data,
-                borderColor: 'rgba(75, 192, 192, 1)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                fill: true,
-                tension: 0.3,
-                pointRadius: 3
-            }]
+            datasets,
         },
         options: {
             responsive: true,
@@ -66,7 +94,7 @@ function createChartConfig(type: ChartType): ChartConfiguration {
                     beginAtZero: true,
                     title: {
                         display: true,
-                        text: props.metric === 'score' ? 'Score' : 'Minutes'
+                        text: 'Minutes / Score'
                     }
                 },
                 x: {
@@ -77,7 +105,7 @@ function createChartConfig(type: ChartType): ChartConfiguration {
                 }
             }
         }
-    }
+    };
 }
 
 onMounted(() => {
@@ -93,6 +121,15 @@ watch(() => sleepStore.sleepData, () => {
     chartInstance.data.datasets[0].data = sleepStore.sleepData.map(r => getMetricData(props.metric, r))
     chartInstance.update()
 }, { deep: true })
+
+// Watch for when the selected metrics change
+watch(selectedMetrics, () => {
+    if (chartRef.value && chartInstance) {
+        chartInstance.destroy();
+        chartInstance = new Chart(chartRef.value, createChartConfig(props.chartType));
+    }
+}, { deep: true })
+
 
 // Watch for metric or chartType changes
 watch(() => [props.metric, props.chartType], () => {

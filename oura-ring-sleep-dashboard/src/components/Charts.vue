@@ -73,7 +73,7 @@ export default {
 }
 
 .chart-wrapper {
-    width: 400px;
+    width: 75vw;
 }
 
 .charts-controls {

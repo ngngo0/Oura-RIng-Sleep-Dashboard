@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
 </script>
 
 <template>
@@ -19,6 +18,8 @@ import HelloWorld from './components/HelloWorld.vue'
 header {
   line-height: 1.5;
   max-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .logo {
@@ -27,8 +28,10 @@ header {
 }
 
 nav {
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  font-size: 12px;
+  font-size: 2rem;
   text-align: center;
   margin-top: 2rem;
 }
@@ -70,9 +73,6 @@ nav a:first-of-type {
 
   nav {
     text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
     padding: 1rem 0;
     margin-top: 1rem;
   }

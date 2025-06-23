@@ -23,7 +23,7 @@
       <label>
         <input type="checkbox" v-model="showResults" />
         Show Results</label>
-      <pre id="message" class="message-area" v-show="showResults"></pre>
+      <pre id="message" class="message-area" v-show="showResults">{{ rawJsonMsg }}</pre>
     </div>
     
     <button @click="getPersonalInfo" class="btn btn-secondary">
@@ -51,6 +51,154 @@
 
     </main>
 </template>
+
+<script>
+import CsvExportModal from './CsvExportModal.vue';
+import JsonExportModal from './JsonExportModal.vue';
+
+// For charts
+import { useSleepStore } from '@/stores/sleepStore';
+import ChartComponent from '@/components/Charts.vue';
+
+export default {
+  components: { CsvExportModal, JsonExportModal, ChartComponent},
+  setup() {
+    const sleepStore = useSleepStore();
+    return { sleepStore };
+  },
+  data() {
+    return {
+      fromDate: '2025-04-18',
+      toDate: '',
+      selectedRing: 'all',
+      allRingData: [
+        { nickname: 'Ring1', email: 'aaaaaa@gmail.com', notes: '', apiId: 1 },
+        { nickname: 'Ring2', email: 'bbbbbb@gmail.com', notes: '', apiId: 2 }
+      ],
+      sleepData: [], // Load this from your API or static JSON
+      showModal: false,
+      showJsonModal: false,
+      personalInfo: '',
+      // chart variables
+      showChart: false,  // controls chart display
+      chartType: 'line', // default chart type
+      selectedMetric: 'rem', // default metric
+      charts: [
+        { id: 1, metric: 'rem' }
+      ],
+
+      showResults: false, // toggle show results
+      rawJsonMsg: '',     // json msg
+    };
+  },
+  methods: {
+    async formSubmit(reqType) {
+      let url = reqType ==='sandbox' ? 'http://127.0.0.1:3000/api/getSleepDataSand': 'http://127.0.0.1:3000/api/getSleepData' ;
+      const queryParams = [];
+
+      if (this.fromDate) {
+        queryParams.push(`start_date=${encodeURIComponent(this.fromDate)}`);
+      }
+
+      if (this.toDate) {
+        queryParams.push(`end_date=${encodeURIComponent(this.toDate)}`);
+      }
+
+      if (queryParams.length > 0) {
+        url += '?' + queryParams.join('&');
+      }
+
+      try {
+        const response = await fetch(url);
+        this.sleepData = await response.json();
+
+        this.sleepStore.setSleepData(this.sleepData); // Update the Pinia sleep store
+        this.showChart = true;               // Show the chart component
+        this.rawJsonMsg = JSON.stringify(this.sleepData, null, 2);
+        localStorage.setItem('sleepData', JSON.stringify(this.sleepData));
+
+      } catch (error) {
+        console.error('Error fetching sleep data:', error);
+        this.rawJsonMsg = 'Error fetching data';
+        this.sleepData = [];
+        this.showChart = false;
+      }
+    },
+    async getPersonalInfo(){
+      let url = 'http://127.0.0.1:3000/api/getPersonalInfo';
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        this.personalInfo = JSON.stringify(data, null, 2);
+      } catch (error) {
+        console.error('Error fetching personal info:', error);
+      }
+    },
+     exportCsv() {
+
+      // Extract headers (all unique keys, including nested keys flattened)
+      const flatten = (obj, prefix = '') =>
+        Object.keys(obj).reduce((acc, k) => {
+          const pre = prefix.length ? prefix + '.' : '';
+          if (typeof obj[k] === 'object' && obj[k] !== null) {
+            Object.assign(acc, flatten(obj[k], pre + k));
+          } else {
+            acc[pre + k] = obj[k];
+          }
+          return acc;
+        }, {});
+
+      // Flatten all objects and get all unique headers
+      const flatData = this.sleepData.map(item => flatten(item));
+      const headers = [...new Set(flatData.flatMap(item => Object.keys(item)))];
+
+      // Build CSV string
+      const csvRows = [];
+      csvRows.push(headers.join(',')); // header row
+
+      flatData.forEach(item => {
+        const row = headers.map(field => {
+          const val = item[field] !== undefined ? item[field] : '';
+          return `"${String(val).replace(/"/g, '""')}"`; // escape quotes
+        });
+        csvRows.push(row.join(','));
+      });
+
+      const csvString = csvRows.join('\n');
+
+      // Download CSV
+      const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.setAttribute('download', 'data.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }, 
+    addChart() {
+      const newId = this.charts.length ? Math.max(...this.charts.map(c => c.id)) + 1 : 1;
+      this.charts.push({ id: newId, metric: 'rem' });
+    },
+    removeChart() {
+      if (this.charts.length > 1) {
+        this.charts.pop();
+      }
+    },
+  },
+  mounted() {
+    this.sleepStore.loadFromStorage();
+
+    if (Array.isArray(this.sleepStore.sleepData) && this.sleepStore.sleepData.length > 0) {
+      this.sleepData = this.sleepStore.sleepData;
+      this.rawJsonMsg = JSON.stringify(this.sleepData, null, 2);
+      this.showChart = true;
+    }
+  }
+
+};
+</script>
 
 <style scoped>
 .dashboard-container {
@@ -194,135 +342,3 @@ h1 {
   margin-bottom: 2rem;
 }
 </style>
-<script>
-import CsvExportModal from './CsvExportModal.vue';
-import JsonExportModal from './JsonExportModal.vue';
-
-// For charts
-import { useSleepStore } from '@/stores/sleepStore';
-import ChartComponent from '@/components/Charts.vue';
-
-export default {
-  components: { CsvExportModal, JsonExportModal, ChartComponent},
-  setup() {
-    const sleepStore = useSleepStore();
-    return { sleepStore };
-  },
-  data() {
-    return {
-      fromDate: '2025-04-18',
-      toDate: '',
-      selectedRing: 'all',
-      allRingData: [
-        { nickname: 'Ring1', email: 'aaaaaa@gmail.com', notes: '', apiId: 1 },
-        { nickname: 'Ring2', email: 'bbbbbb@gmail.com', notes: '', apiId: 2 }
-      ],
-      sleepData: [], // Load this from your API or static JSON
-      showModal: false,
-      showJsonModal: false,
-      personalInfo: '',
-      // chart variables
-      showChart: false,  // controls chart display
-      chartType: 'line', // default chart type
-      selectedMetric: 'rem', // default metric
-      charts: [
-        { id: 1, metric: 'rem' }
-      ],
-
-      showFormResults: false, // toggle show results
-    };
-  },
-  methods: {
-    async formSubmit(reqType) {
-      let url = reqType ==='sandbox' ? 'http://127.0.0.1:3000/api/getSleepDataSand': 'http://127.0.0.1:3000/api/getSleepData' ;
-      const queryParams = [];
-
-      if (this.fromDate) {
-        queryParams.push(`start_date=${encodeURIComponent(this.fromDate)}`);
-      }
-
-      if (this.toDate) {
-        queryParams.push(`end_date=${encodeURIComponent(this.toDate)}`);
-      }
-
-      if (queryParams.length > 0) {
-        url += '?' + queryParams.join('&');
-      }
-
-      try {
-        const response = await fetch(url);
-        this.sleepData = await response.json();
-
-        this.sleepStore.setSleepData(this.sleepData); // Update the Pinia sleep store
-        this.showChart = true;               // Show the chart component
-
-        document.getElementById('message').textContent = JSON.stringify(this.sleepData, null, 2);
-      } catch (error) {
-        console.error('Error fetching sleep data:', error);
-      }
-    },
-    async getPersonalInfo(){
-      let url = 'http://127.0.0.1:3000/api/getPersonalInfo';
-
-      try {
-        const response = await fetch(url);
-        const data = await response.json();
-
-        this.personalInfo = JSON.stringify(data, null, 2);
-      } catch (error) {
-        console.error('Error fetching personal info:', error);
-      }
-    },
-     exportCsv() {
-
-      // Extract headers (all unique keys, including nested keys flattened)
-      const flatten = (obj, prefix = '') =>
-        Object.keys(obj).reduce((acc, k) => {
-          const pre = prefix.length ? prefix + '.' : '';
-          if (typeof obj[k] === 'object' && obj[k] !== null) {
-            Object.assign(acc, flatten(obj[k], pre + k));
-          } else {
-            acc[pre + k] = obj[k];
-          }
-          return acc;
-        }, {});
-
-      // Flatten all objects and get all unique headers
-      const flatData = this.sleepData.map(item => flatten(item));
-      const headers = [...new Set(flatData.flatMap(item => Object.keys(item)))];
-
-      // Build CSV string
-      const csvRows = [];
-      csvRows.push(headers.join(',')); // header row
-
-      flatData.forEach(item => {
-        const row = headers.map(field => {
-          const val = item[field] !== undefined ? item[field] : '';
-          return `"${String(val).replace(/"/g, '""')}"`; // escape quotes
-        });
-        csvRows.push(row.join(','));
-      });
-
-      const csvString = csvRows.join('\n');
-
-      // Download CSV
-      const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.setAttribute('download', 'data.csv');
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }, 
-    addChart() {
-      const newId = this.charts.length ? Math.max(...this.charts.map(c => c.id)) + 1 : 1;
-      this.charts.push({ id: newId, metric: 'rem' });
-    },
-    removeChart() {
-      if (this.charts.length > 1) {
-        this.charts.pop();
-      }
-    },
-  }
-};
-</script>
