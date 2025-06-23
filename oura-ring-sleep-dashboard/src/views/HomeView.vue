@@ -60,7 +60,7 @@
         />
     </div>
 
-    <ChartComponent v-if="showChart" :chartType="chartType" />
+    <ChartsComponent v-if="showChart" :chartType="chartType" />
 
     </main>
 </template>
@@ -71,10 +71,10 @@ import JsonExportModal from './JsonExportModal.vue';
 
 // For charts
 import { useSleepStore } from '@/stores/sleepStore';
-import ChartComponent from '@/components/Charts.vue';
+import ChartsComponent from '@/components/Charts.vue';
 
 export default {
-  components: { CsvExportModal, JsonExportModal, ChartComponent},
+  components: { CsvExportModal, JsonExportModal, ChartsComponent},
   setup() {
     const sleepStore = useSleepStore();
     return { sleepStore };

@@ -1,4 +1,16 @@
 <template>
+    <button @click="showExportModal = true" class="btn btn-export">
+      Export Chart
+    </button>
+
+    <ChartExportModal
+      v-if="showExportModal"
+      :canvasRef="chartRef"
+      :defaultFilename="defaultFilename"
+      :chartConfig="chartConfig"
+      @close="showExportModal = false"
+    />
+
     <div class="metric-selector">
       <label v-for="metric in ['rem', 'deep', 'total', 'score']" :key="metric">
         <input
@@ -25,8 +37,8 @@ import { onMounted, ref, watch } from 'vue'
 import { useSleepStore } from '@/stores/sleepStore'
 import { Chart, registerables } from 'chart.js'
 import type { ChartConfiguration, ChartType } from 'chart.js'
-import ChartJsToImage from 'chartjs-to-image';
 
+import ChartExportModal from './ChartExportModal.vue'
 
 const props = defineProps<{
     chartType: ChartType,
@@ -40,6 +52,15 @@ let chartInstance: Chart | null = null
 const selectedMetrics = ref<string[]>(['rem'])
 
 const sleepStore = useSleepStore()
+
+// chart config 
+const chartConfig = ref<ChartConfiguration | null>(null)
+
+// Modal visibility
+const showExportModal = ref(false)
+
+// Default filename for export
+const defaultFilename = ref(`my-chart-${new Date().toISOString().slice(0, 10)}`)
 
 function getMetricData(metric: string, record: any): number {
     switch (metric) {
@@ -110,7 +131,8 @@ function createChartConfig(type: ChartType): ChartConfiguration {
 
 onMounted(() => {
     if (chartRef.value) {
-        chartInstance = new Chart(chartRef.value, createChartConfig(props.chartType))
+        chartConfig.value = createChartConfig(props.chartType)
+        chartInstance = new Chart(chartRef.value, chartConfig.value)
     }
 })
 
@@ -118,7 +140,15 @@ onMounted(() => {
 watch(() => sleepStore.sleepData, () => {
     if (!chartInstance) return
     chartInstance.data.labels = sleepStore.sleepData.map(r => r.day)
-    chartInstance.data.datasets[0].data = sleepStore.sleepData.map(r => getMetricData(props.metric, r))
+    chartInstance.data.datasets = selectedMetrics.value.map(metric => ({
+        label: getMetricLabel(metric),
+        data: sleepStore.sleepData.map(r => getMetricData(metric, r)),
+        borderColor: chartInstance?.data.datasets.find(ds => ds.label === getMetricLabel(metric))?.borderColor || 'rgba(75, 192, 192, 1)',
+        backgroundColor: chartInstance?.data.datasets.find(ds => ds.label === getMetricLabel(metric))?.backgroundColor || 'rgba(75, 192, 192, 0.2)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 3
+    }))
     chartInstance.update()
 }, { deep: true })
 
@@ -129,7 +159,6 @@ watch(selectedMetrics, () => {
         chartInstance = new Chart(chartRef.value, createChartConfig(props.chartType));
     }
 }, { deep: true })
-
 
 // Watch for metric or chartType changes
 watch(() => [props.metric, props.chartType], () => {
