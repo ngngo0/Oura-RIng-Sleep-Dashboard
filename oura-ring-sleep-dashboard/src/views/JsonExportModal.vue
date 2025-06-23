@@ -45,105 +45,6 @@
     </div>
 </template>
 
-<script>
-export default {
-    props: {
-        jsonData: {
-            type: Array,
-            required: true,
-        },
-    },
-    data() {
-        return {
-            filename: "sleep-data",
-            visibleColumns: [],
-            flashingRowIndex: null,
-        };
-    },
-    computed: {
-        columns() {
-            if (!this.jsonData.length) return [];
-            return Object.keys(this.jsonData[0]);
-        },
-        filteredData() {
-            return this.jsonData.map((row) => {
-                const filteredRow = {};
-                this.visibleColumns.forEach((col) => {
-                    filteredRow[col] = row[col];
-                });
-                return filteredRow;
-            });
-        },
-    },
-    watch: {
-        jsonData: {
-            immediate: true,
-            handler(newData, oldData) {
-                if (!oldData || !oldData.length) {
-                    // First load: initialize visibleColumns with all keys of first row if any
-                    if (newData.length) {
-                        this.visibleColumns = Object.keys(newData[0]);
-                    }
-                    return;
-                }
-
-                // flashing added rows
-                const oldIds = new Set(oldData.map(r => r.id));
-                const addedIndex = newData.findIndex(r => !oldIds.has(r.id));
-
-                if (addedIndex !== -1) {
-                    this.flashingRowIndex = addedIndex;
-                    setTimeout(() => {
-                        this.flashingRowIndex = null;
-                    }, 1500);
-                }
-            },
-        },
-    },
-
-    methods: {
-        toggleColumn(col, checked) {
-            if (checked) {
-                if (!this.visibleColumns.includes(col)) {
-                    const originalIndex = this.columns.indexOf(col);
-                    const newVisible = [...this.visibleColumns];
-                    let insertAt = newVisible.findIndex(
-                        (c) => this.columns.indexOf(c) > originalIndex
-                    );
-                    if (insertAt === -1) insertAt = newVisible.length;
-                    newVisible.splice(insertAt, 0, col);
-                    this.visibleColumns = newVisible;
-
-                    // Flash the first row as an example when column is re-added
-                    this.flashingRowIndex = 0;
-
-                    // Clear flash after 1.5 seconds
-                    setTimeout(() => {
-                        this.flashingRowIndex = null;
-                    }, 1500);
-                }
-            } else {
-                this.visibleColumns = this.visibleColumns.filter((c) => c !== col);
-            }
-        },
-        exportJson() {
-            const fullFilename = this.filename.trim() + ".json";
-            const blob = new Blob([JSON.stringify(this.filteredData, null, 2)], {
-                type: "application/json",
-            });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = url;
-            link.setAttribute("download", fullFilename);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-        },
-    },
-};
-</script>
-
 <style scoped>
 .modal-overlay {
     position: fixed;
@@ -283,3 +184,102 @@ button:last-child:hover {
     animation: subtleFlash 1.5s ease forwards;
 }
 </style>
+
+<script lang="ts">
+export default {
+    props: {
+        jsonData: {
+            type: Array,
+            required: true,
+        },
+    },
+    data() {
+        return {
+            filename: "sleep-data",
+            visibleColumns: [],
+            flashingRowIndex: null,
+        };
+    },
+    computed: {
+        columns() {
+            if (!this.jsonData.length) return [];
+            return Object.keys(this.jsonData[0]);
+        },
+        filteredData() {
+            return this.jsonData.map((row) => {
+                const filteredRow = {};
+                this.visibleColumns.forEach((col) => {
+                    filteredRow[col] = row[col];
+                });
+                return filteredRow;
+            });
+        },
+    },
+    watch: {
+        jsonData: {
+            immediate: true,
+            handler(newData, oldData) {
+                if (!oldData || !oldData.length) {
+                    // First load: initialize visibleColumns with all keys of first row if any
+                    if (newData.length) {
+                        this.visibleColumns = Object.keys(newData[0]);
+                    }
+                    return;
+                }
+
+                // flashing added rows
+                const oldIds = new Set(oldData.map(r => r.id));
+                const addedIndex = newData.findIndex(r => !oldIds.has(r.id));
+
+                if (addedIndex !== -1) {
+                    this.flashingRowIndex = addedIndex;
+                    setTimeout(() => {
+                        this.flashingRowIndex = null;
+                    }, 1500);
+                }
+            },
+        },
+    },
+
+    methods: {
+        toggleColumn(col, checked) {
+            if (checked) {
+                if (!this.visibleColumns.includes(col)) {
+                    const originalIndex = this.columns.indexOf(col);
+                    const newVisible = [...this.visibleColumns];
+                    let insertAt = newVisible.findIndex(
+                        (c) => this.columns.indexOf(c) > originalIndex
+                    );
+                    if (insertAt === -1) insertAt = newVisible.length;
+                    newVisible.splice(insertAt, 0, col);
+                    this.visibleColumns = newVisible;
+
+                    // Flash the first row as an example when column is re-added
+                    this.flashingRowIndex = 0;
+
+                    // Clear flash after 1.5 seconds
+                    setTimeout(() => {
+                        this.flashingRowIndex = null;
+                    }, 1500);
+                }
+            } else {
+                this.visibleColumns = this.visibleColumns.filter((c) => c !== col);
+            }
+        },
+        exportJson() {
+            const fullFilename = this.filename.trim() + ".json";
+            const blob = new Blob([JSON.stringify(this.filteredData, null, 2)], {
+                type: "application/json",
+            });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", fullFilename);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        },
+    },
+};
+</script>

@@ -19,9 +19,13 @@
         <input type="submit" value="Send Request User" @click="formSubmit('user')" class="btn btn-primary" />
       </div>
     </form>
-
-    <pre id="message" class="message-area"></pre>
-
+    <div>
+      <label>
+        <input type="checkbox" v-model="showResults" />
+        Show Results</label>
+      <pre id="message" class="message-area" v-show="showResults"></pre>
+    </div>
+    
     <button @click="getPersonalInfo" class="btn btn-secondary">
       Get Personal Info
     </button>
@@ -42,8 +46,12 @@
 
       <JsonExportModal v-if="showJsonModal" :jsonData="sleepData" @close="showJsonModal = false" />
     </div>
-  </main>
+
+    <ChartComponent v-if="showChart" :chartType="chartType" />
+
+    </main>
 </template>
+
 <style scoped>
 .dashboard-container {
   max-width: 900px;
@@ -163,13 +171,43 @@ h1 {
 .btn-export:hover:not(:disabled) {
   background-color: #1e7e34;
 }
+
+/* Chart css*/
+
+.charts-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.chart-wrapper {
+  width: 400px;
+}
+
+.charts-controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+}
 </style>
 <script>
 import CsvExportModal from './CsvExportModal.vue';
 import JsonExportModal from './JsonExportModal.vue';
 
+// For charts
+import { useSleepStore } from '@/stores/sleepStore';
+import ChartComponent from '@/components/Charts.vue';
+
 export default {
-  components: { CsvExportModal, JsonExportModal },
+  components: { CsvExportModal, JsonExportModal, ChartComponent},
+  setup() {
+    const sleepStore = useSleepStore();
+    return { sleepStore };
+  },
   data() {
     return {
       fromDate: '2025-04-18',
@@ -183,6 +221,15 @@ export default {
       showModal: false,
       showJsonModal: false,
       personalInfo: '',
+      // chart variables
+      showChart: false,  // controls chart display
+      chartType: 'line', // default chart type
+      selectedMetric: 'rem', // default metric
+      charts: [
+        { id: 1, metric: 'rem' }
+      ],
+
+      showFormResults: false, // toggle show results
     };
   },
   methods: {
@@ -205,8 +252,10 @@ export default {
       try {
         const response = await fetch(url);
         this.sleepData = await response.json();
-        //barGraph(data); // assumes barGraph is globally available
-        //lineGraph(data); // assumes lineGraph is globally available
+
+        this.sleepStore.setSleepData(this.sleepData); // Update the Pinia sleep store
+        this.showChart = true;               // Show the chart component
+
         document.getElementById('message').textContent = JSON.stringify(this.sleepData, null, 2);
       } catch (error) {
         console.error('Error fetching sleep data:', error);
@@ -264,7 +313,16 @@ export default {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    }
+    }, 
+    addChart() {
+      const newId = this.charts.length ? Math.max(...this.charts.map(c => c.id)) + 1 : 1;
+      this.charts.push({ id: newId, metric: 'rem' });
+    },
+    removeChart() {
+      if (this.charts.length > 1) {
+        this.charts.pop();
+      }
+    },
   }
 };
 </script>

@@ -1,6 +1,12 @@
+Taskss 6/2
+- One big graph, checkboxes,
+- restrict axis-es??
+- Minutes --> Hours is a nice to have
+
 Tasks 5/27
 - Default name for exports(json/csv) should be "ringId - start date - end date"
 - adding graphs --> adding an export button for each graph (png + svg/eps/pdf)
+- Fix the 54321111111 thing
 
 Tasks 4/28/25 meeting
 ---
