@@ -11,48 +11,35 @@
 
         <div class="charts-container">
             <div v-for="chart in charts" :key="chart.id" class="chart-wrapper">
-                <label>
-                    Select Metric:
-                    <select v-model="chart.metric" class="input-select">
-                        <option value="rem">REM Sleep</option>
-                        <option value="deep">Deep Sleep</option>
-                        <option value="total">Total Sleep</option>
-                        <option value="score">Sleep Score</option>
-                    </select>
-                </label>
-                <ChartComponent :chartType="chartType" :metric="chart.metric" />
+                <VegaComponent :fromDate="fromDate" :toDate="toDate" :selectedRing="selectedRing"/>
             </div>
         </div>
+
     </div>
 </template>
 
 <script>
-import ChartComponent from '@/components/Chart.vue';
+import VegaComponent from '@/components/VegaChart.vue';
 
 export default {
     name: 'Charts',
-    components: { ChartComponent },
+    components: { VegaComponent },
     props: {
-        chartType: {
-            type: String,
-            default: 'line'
-        },
-        show: {
-            type: Boolean,
-            default: false
-        }
+        fromDate: { type: String, required: false },
+        toDate: { type: String, required: false },
+        selectedRing: { type: String, required: false },
     },
     data() {
         return {
             charts: [
-                { id: 1, metric: 'rem' }
+                { id: 1 }
             ]
         };
     },
     methods: {
         addChart() {
             const newId = this.charts.length ? Math.max(...this.charts.map(c => c.id)) + 1 : 1;
-            this.charts.push({ id: newId, metric: 'rem' });
+            this.charts.push({ id: newId});
         },
         removeChart() {
             if (this.charts.length > 1) {
@@ -61,6 +48,8 @@ export default {
         }
     }
 };
+
+
 </script>
 
 <style scoped>
@@ -114,8 +103,10 @@ export default {
 }
 
 .btn:disabled {
-  background-color: #c0c0c0;
+  background: #E8E8E8;
+  color: #999;
   cursor: not-allowed;
+  border: 1px solid #D0D0D0;
 }
 
 .btn-export {

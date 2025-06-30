@@ -1,8 +1,9 @@
 @import './base.css';
 
 #app {
-  padding: 2rem;
   font-weight: normal;
+  display: flex;
+  flex-direction: column;
 }
 
 a,
@@ -19,14 +20,9 @@ a,
   }
 }
 
-@media (min-width: 1024px) {
+@media (max-width: 1024px) {
   body {
     display: flex;
     place-items: center;
-  }
-
-  #app {
-    display: flex;
-    padding: 0 2rem;
   }
 }

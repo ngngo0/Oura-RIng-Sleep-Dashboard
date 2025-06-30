@@ -60,8 +60,10 @@
         />
     </div>
 
-    <ChartsComponent v-if="showChart" :chartType="chartType" />
-
+    <ChartsComponent v-if="showChart" 
+      :toDate="toDate"
+      :fromDate="fromDate" 
+      :selectedRing="selectedRing"/>
     </main>
 </template>
 
@@ -93,7 +95,6 @@ export default {
       personalInfo: '',
       // chart variables
       showChart: false,  // controls chart display
-      chartType: 'line', // default chart type
       selectedMetric: 'rem', // default metric
       charts: [
         { id: 1, metric: 'rem' }
@@ -218,7 +219,6 @@ export default {
 
 <style scoped>
 .dashboard-container {
-  max-width: 900px;
   margin: 2rem auto;
   padding: 1rem 2rem;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -303,8 +303,10 @@ h1 {
 }
 
 .btn:disabled {
-  background-color: #c0c0c0;
+  background: #E8E8E8;
+  color: #999;
   cursor: not-allowed;
+  border: 1px solid #D0D0D0;
 }
 
 .message-area,

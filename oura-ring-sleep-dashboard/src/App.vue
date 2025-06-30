@@ -1,10 +1,6 @@
-<script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-</script>
-
 <template>
   <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="50" height="50" />
     <nav>
       <RouterLink to="/">Home</RouterLink>
       <RouterLink to="/settings">Settings</RouterLink>
@@ -16,24 +12,30 @@ import { RouterLink, RouterView } from 'vue-router'
 
 <style scoped>
 header {
+  position: sticky;
+  top: 0;
+  z-index: 1000; /* make sure it stays on top */
+  background-color: #2C5F5D; /* or whatever your background is */
   line-height: 1.5;
-  max-height: 100vh;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid var(--color-border);
+  box-sizing: border-box;
 }
 
 .logo {
   display: block;
-  margin: 0 auto 2rem;
+  margin: 0;
 }
 
 nav {
   display: flex;
-  flex-direction: column;
-  width: 100%;
+  gap: 2rem;
   font-size: 2rem;
-  text-align: center;
-  margin-top: 2rem;
+  text-align: left;
+  margin-top: 0;
 }
 
 nav a.router-link-exact-active {
@@ -47,34 +49,36 @@ nav a.router-link-exact-active:hover {
 nav a {
   display: inline-block;
   padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
+  border-left: none;
+
 }
 
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
+/* Responsive: stack vertically on small screens */
+@media (max-width: 1023px) {
   header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
   }
 
   .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
+    margin-bottom: 1rem;
   }
 
   nav {
-    text-align: left;
-    padding: 1rem 0;
-    margin-top: 1rem;
+    flex-direction: column;
+    gap: 1rem;
+    font-size: 1.5rem;
+    margin-top: 0;
+  }
+
+  nav a {
+    padding: 0;
   }
 }
 </style>
+
+
+<script setup lang="ts">
+import { RouterLink, RouterView } from 'vue-router'
+</script>
