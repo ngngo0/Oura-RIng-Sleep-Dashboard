@@ -4,8 +4,8 @@
       "id": 1,
       "nickname": "us",
       "email": "user1@exaple.com",
-      "notes": "First pers",
-      "PAT":"123"
+      "notes": "First person",
+      "PAT": "df827deca69f0cd5266eb3710086fdf4:c6f6019ae120f6907f2c945925c4d96d80aa6cd3c7b5a3bd5ea2788a6b5e3364cadffa349c305a2c9d130ca717bfda0b"
     },
     {
       "id": 2,
@@ -62,7 +62,7 @@
       "notes": "Tenth user"
     }
   ],
-  "preferences":{
+  "preferences": {
     "csvVisibleColumns": ""
   }
 }

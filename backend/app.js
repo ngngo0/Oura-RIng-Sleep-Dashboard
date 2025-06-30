@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config();              // loads dotenv to process.env
+
 // Importing the Oura API SDK
 import { Oura } from "oura_api";
 
@@ -9,10 +12,6 @@ import { validateUser } from './validation.js';
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { encrypt, decrypt } from './utils/cryptoUtils.js';
-
-import dotenv from 'dotenv';
-
-dotenv.config();              // loads dotenv to process.env
 
 // oura sandbox set up 
 const ouraSandboxClient = new Oura({ useSandbox: true });
@@ -69,52 +68,69 @@ if (db.data.users.length === 0) {
 
 // GET /users
 app.get('/users', (req, res) => {
-  res.json(db.data.users)
-})
+  const usersWithDecryptedPATs = db.data.users.map(user => {
+    let decryptedPAT = '';
+    try {
+      decryptedPAT = user.PAT ? decrypt(user.PAT) : '';
+    } catch (e) {
+      console.warn(`Failed to decrypt PAT for user ${user.id}:`, e.message);
+      decryptedPAT = '[invalid or unencrypted]';  // optional fallback
+    }
+
+    return {
+      ...user,
+      PAT: decryptedPAT,
+    };
+  });
+
+  res.json(usersWithDecryptedPATs);
+});
+
 
 // GET /users/:id
 app.get('/users/:id', (req, res) => {
   const user = db.data.users.find(u => u.id === parseInt(req.params.id))
   if (!user) return res.status(404).json({ error: 'User not found' })
-  res.json(user)
+  const userToReturn = { ...user, PAT: decrypt(user.PAT) };
+  res.json(userToReturn);
 })
 
-// GET /users/:nickname
-app.get('/users/:nickname', (req, res) => {
-  const user = db.data.users.find(u => u.id === parseInt(req.params.id))
-  if (!user) return res.status(404).json({ error: 'User not found' })
-  res.json(user)
-})
-
-// PATCH/UDPATE to edit user details by id
+// PATCH/UPDATE to edit user details by id
 app.patch('/users/:id', async (req, res) => {
-  const userId = parseInt(req.params.id);  // Get user ID from URL
+  const userId = parseInt(req.params.id); // Get user ID from URL
 
   // Find the user in the database
   const user = db.data.users.find((user) => user.id === userId);
   if (!user) {
     return res.status(404).json({ message: 'User not found' });
   }
-  const data = req.body;
-  if (data.nickname) {
-    // update name
-    user.nickname=data.nickname;
-  }
-  if (data.email) {
-    // update email
-    user.email=data.email;
-  }
-  if(data.notes){
-    user.notes=data.notes;
 
-  }
-  console.log(userId);
+  const { nickname, email, notes, PAT } = req.body;
 
-  // Save the updated data
+  // Only update nickname if it's non-empty and provided
+  if (nickname && nickname.trim() !== '') {
+    user.nickname = nickname;
+  }
+
+  // Email can be cleared
+  if (req.body.hasOwnProperty('email')) {
+    user.email = email; // May be empty string
+  }
+
+  // Notes can be cleared
+  if (req.body.hasOwnProperty('notes')) {
+    user.notes = notes; // May be empty string
+  }
+
+  // PAT can be cleared or encrypted
+  if (req.body.hasOwnProperty('PAT')) {
+    user.PAT = PAT ? encrypt(PAT) : ''; // Clear if empty
+  }
+
   await db.write();
-
-  res.json(user);  // Respond with the updated user
+  res.json(user);
 });
+
 
 // POST /users create new user
 app.post('/users', async (req, res) => {
@@ -170,8 +186,6 @@ app.get('/api/getSleepDataSand', async (req, res) => {
     console.log(start_date, end_date);
     const finalStartDate = start_date || '2025-04-01';
     const finalEndDate = end_date || new Date().toISOString().split('T')[0];
-
-
     const json = await ouraSandboxClient.fetchData(`sleep?start_date=${finalStartDate}&end_date=${finalEndDate}`);
     res.json(json);
   } catch (error) {
@@ -182,6 +196,18 @@ app.get('/api/getSleepDataSand', async (req, res) => {
 
 app.get('/api/getSleepData', async (req, res) => {
   try {
+    // 1. Validate
+    if (!userId) return res.status(400).json({ error: "Missing userId" });
+
+    // 2. Lookup user and decrypt PAT
+    const user = db.data.users.find(u => u.id === parseInt(userId));
+    if (!user || !user.PAT) return res.status(404).json({ error: "User or PAT not found" });
+
+    const decryptedPAT = decrypt(user.PAT);
+
+    // 3. Create new Oura instance
+    const oura = new Oura(decryptedPAT);
+
     const { start_date, end_date } = req.query;
     console.log(start_date, end_date);
     const finalStartDate = start_date || '2025-04-01';

@@ -3,6 +3,12 @@ Taskss
 - add the close info box button
 - change the charting library from chartjs to vegalite
 
+next iteration:
+- last fetched date
+- open multiple users at once?
+- layer up multiple graphs
+- lock the email if the pat is entered in (query it)
+
 6/23
 - You cant access the oura ring api without a membership. so just know that you'll have to do that. The alternative is to request your past data, which they will respond to within 48 hours.
 - 

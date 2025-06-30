@@ -8,14 +8,16 @@
   </header>
 
   <RouterView />
+  <Toast/>
 </template>
 
 <style scoped>
 header {
   position: sticky;
+  height:10vh;
   top: 0;
-  z-index: 1000; /* make sure it stays on top */
-  background-color: #2C5F5D; /* or whatever your background is */
+  z-index: 1000;
+  background-color: #2C5F5D;
   line-height: 1.5;
   display: flex;
   align-items: center;
@@ -39,7 +41,7 @@ nav {
 }
 
 nav a.router-link-exact-active {
-  color: var(--color-text);
+  color: var(--vt-c-white);
 }
 
 nav a.router-link-exact-active:hover {
@@ -80,5 +82,6 @@ nav a {
 
 
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterLink, RouterView } from 'vue-router';
+import Toast from '@/components/Toast.vue';
 </script>

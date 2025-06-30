@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="charts-controls">
-            <button @click="addChart" class="btn btn-secondary" style="background-color: green;">
+            <button @click="addChart" class="btn btn-secondary" >
                 Add Chart
             </button>
             <button @click="removeChart" class="btn btn-secondary" :disabled="charts.length === 1">
@@ -93,13 +93,13 @@ export default {
 }
 
 .btn-secondary {
-  background-color: #6c757d;
+  background-color:  #28a745;
   color: white;
   margin-bottom: 1rem;
 }
 
 .btn-secondary:hover {
-  background-color: #565e64;
+  background-color: #1e7e34;
 }
 
 .btn:disabled {
@@ -109,12 +109,12 @@ export default {
   border: 1px solid #D0D0D0;
 }
 
-.btn-export {
+.btn-green {
   background-color: #28a745;
   color: white;
 }
 
-.btn-export:hover:not(:disabled) {
+.btn-green:hover:not(:disabled) {
   background-color: #1e7e34;
 }
 

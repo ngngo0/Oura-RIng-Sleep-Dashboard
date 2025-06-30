@@ -3,9 +3,16 @@
     <h1>Main Dashboard</h1>
 
     <form @submit.prevent class="filter-form">
-      <select v-model="selectedRing" class="input-select">
-        <option value="all" selected>All Rings</option>
-        <option v-for="ring in allRingData" :key="ring.apiId">{{ ring.nickname }}</option>
+      <select v-model="selectedRingNickname" class="input-select">
+        <option value="all">All Rings</option>
+        <option
+          v-for="ring in allRingData"
+          :key="ring.id"
+          :value="ring.nickname"
+          :disabled="!ring.PAT"
+        >
+          {{ ring.nickname }} <span v-if="!ring.PAT">(no PAT)</span>
+        </option>
       </select>
 
       <div class="date-inputs">
@@ -19,17 +26,20 @@
         <input type="submit" value="Send Request User" @click="formSubmit('user')" class="btn btn-primary" />
       </div>
     </form>
-    <div>
+    <div class="action-buttons">
       <label>
-        <input type="checkbox" v-model="showResults" />
-        Show Results</label>
+        <button @click="showResults = !showResults" type="button" class="btn btn-toggle">
+          {{ showResults ? 'Hide' : 'Show' }} Results
+        </button>
+      </label>
       <pre id="message" class="message-area" v-show="showResults">{{ rawJsonMsg }}</pre>
+
+      <button @click="togglePersonalInfo" class="btn btn-toggle">
+        {{ showPersonalInfo ? 'Hide' : 'Get' }} Personal Info
+      </button>
+      <pre id="personalInfo" class="info-area" v-if="showPersonalInfo && personalInfo">{{ personalInfo }}</pre>
     </div>
-    
-    <button @click="getPersonalInfo" class="btn btn-secondary">
-      Get Personal Info
-    </button>
-    <pre id="personalInfo" class="info-area" v-if="personalInfo">{{ personalInfo }}</pre>
+
 
     <div class="export-buttons">
       <button @click="showModal = true" :disabled="!sleepData || sleepData.length === 0"
@@ -42,7 +52,7 @@
         :jsonData="sleepData" 
         :toDate="toDate"
         :fromDate="fromDate"
-        :selectedRing="selectedRing"
+        :selectedRing="selectedRingNickname"
         @close="showModal = false" 
       />
 
@@ -55,7 +65,7 @@
         :jsonData="sleepData" 
         :toDate="toDate"
         :fromDate="fromDate"
-        :selectedRing="selectedRing"
+        :selectedRing="selectedRingNickname"
         @close="showJsonModal = false" 
         />
     </div>
@@ -63,7 +73,7 @@
     <ChartsComponent v-if="showChart" 
       :toDate="toDate"
       :fromDate="fromDate" 
-      :selectedRing="selectedRing"/>
+      :selectedRing="selectedRingNickname"/>
     </main>
 </template>
 
@@ -75,6 +85,10 @@ import JsonExportModal from './JsonExportModal.vue';
 import { useSleepStore } from '@/stores/sleepStore';
 import ChartsComponent from '@/components/Charts.vue';
 
+// For fetching users
+import axios from 'axios';
+import { useToastStore } from '@/stores/toast';
+
 export default {
   components: { CsvExportModal, JsonExportModal, ChartsComponent},
   setup() {
@@ -84,27 +98,40 @@ export default {
   data() {
     return {
       fromDate: '2025-04-18',
-      selectedRing: 'all',
+      selectedRingNickname: 'all',
       allRingData: [
         { nickname: 'Ring1', email: 'aaaaaa@gmail.com', notes: '', apiId: 1 },
         { nickname: 'Ring2', email: 'bbbbbb@gmail.com', notes: '', apiId: 2 }
       ],
-      sleepData: [], // Load this from your API or static JSON
+      sleepData: [],            // Load this from your API or static JSON
       showModal: false,
       showJsonModal: false,
-      personalInfo: '',
+      
       // chart variables
-      showChart: false,  // controls chart display
-      selectedMetric: 'rem', // default metric
+      showChart: false,         // controls chart display
+      selectedMetric: 'rem',    // default metric
       charts: [
         { id: 1, metric: 'rem' }
       ],
 
-      showResults: false, // toggle show results
-      rawJsonMsg: '',     // json msg
+      showResults: false,       // toggle show results
+      showPersonalInfo: false,  //toggle personal info
+      rawJsonMsg: '',           // json msg
+      personalInfo: '',
     };
   },
   methods: {
+    async fetchUsers() {
+      const toast = useToastStore();
+      try {
+        // Make a GET request to the Express API
+        const response = await axios.get('http://localhost:3000/users');
+        this.allRingData = response.data;
+      } catch (error) {
+        console.error('Error fetching users:', error);
+        toast.show('Failed to fetch users.', 'error');
+      }
+    },
     async formSubmit(reqType) {
       let url = reqType ==='sandbox' ? 'http://127.0.0.1:3000/api/getSleepDataSand': 'http://127.0.0.1:3000/api/getSleepData' ;
       const queryParams = [];
@@ -147,6 +174,13 @@ export default {
         this.personalInfo = JSON.stringify(data, null, 2);
       } catch (error) {
         console.error('Error fetching personal info:', error);
+      }
+    },
+    async togglePersonalInfo() {
+      this.showPersonalInfo = !this.showPersonalInfo;
+
+      if (this.showPersonalInfo && !this.personalInfo) {
+        await this.getPersonalInfo();
       }
     },
      exportCsv() {
@@ -201,6 +235,7 @@ export default {
     },
   },
   mounted() {
+    this.fetchUsers();
     this.sleepStore.loadFromStorage();
 
     if (Array.isArray(this.sleepStore.sleepData) && this.sleepStore.sleepData.length > 0) {
@@ -218,6 +253,11 @@ export default {
 </script>
 
 <style scoped>
+.input-select option:disabled {
+  color: #9ca3af; /* Tailwind gray-400 */
+  background-color: #f3f4f6; /* Tailwind gray-100 */
+}
+
 .dashboard-container {
   margin: 2rem auto;
   padding: 1rem 2rem;
@@ -314,12 +354,12 @@ h1 {
   background-color: #f4f4f4;
   padding: 1rem;
   border-radius: 6px;
-  min-height: 4rem;
   white-space: pre-wrap;
   margin-bottom: 1.5rem;
   font-family: monospace;
   color: #444;
   max-height: 40vh;
+  max-width: 60vw;
   overflow-y: auto;
 }
 
@@ -337,6 +377,26 @@ h1 {
 .btn-export:hover:not(:disabled) {
   background-color: #1e7e34;
 }
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+}
+
+.btn-toggle {
+  background-color: #dee2e6;
+  color: #333;
+  border: 1px solid #ccc;
+}
+
+.btn-toggle:hover {
+  background-color: #cfd4d8;
+}
+
 
 /* Chart css*/
 
