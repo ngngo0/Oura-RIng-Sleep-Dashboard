@@ -13,8 +13,8 @@ a,
   transition: 0.4s;
   padding: 3px;
 }
-body{
-  margin:0px;
+body {
+  margin: 0px;
 }
 
 @media (hover: hover) {

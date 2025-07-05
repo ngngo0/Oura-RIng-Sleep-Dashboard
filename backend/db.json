@@ -11,7 +11,8 @@
       "id": 2,
       "nickname": "use",
       "email": "user2@example.com",
-      "notes": "Secon"
+      "notes": "Secon",
+      "PAT": "d04a6fd6d5388afebacb3dda39543aa4:2b9b034993d7167cd44efb421e57c3c9"
     },
     {
       "id": 3,

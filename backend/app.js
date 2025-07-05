@@ -16,10 +16,6 @@ import { encrypt, decrypt } from './utils/cryptoUtils.js';
 // oura sandbox set up 
 const ouraSandboxClient = new Oura({ useSandbox: true });
 
-// oura pat setup
-const accessToken = process.env.PAT_SECRET_KEY;
-const oura = new Oura(accessToken);
-
 import express from 'express';
 import cors from 'cors';
 
@@ -196,24 +192,25 @@ app.get('/api/getSleepDataSand', async (req, res) => {
 
 app.get('/api/getSleepData', async (req, res) => {
   try {
+    const { ring_id, start_date, end_date } = req.query;
+
     // 1. Validate
-    if (!userId) return res.status(400).json({ error: "Missing userId" });
+    if (!ring_id) return res.status(400).json({ error: "Missing ring Id" });
 
     // 2. Lookup user and decrypt PAT
-    const user = db.data.users.find(u => u.id === parseInt(userId));
+    const user = db.data.users.find(u => u.id === parseInt(ring_id));
     if (!user || !user.PAT) return res.status(404).json({ error: "User or PAT not found" });
 
     const decryptedPAT = decrypt(user.PAT);
 
     // 3. Create new Oura instance
-    const oura = new Oura(decryptedPAT);
+    const myOuraInstance = new Oura(decryptedPAT);
 
-    const { start_date, end_date } = req.query;
     console.log(start_date, end_date);
     const finalStartDate = start_date || '2025-04-01';
     const finalEndDate = end_date || new Date().toISOString().split('T')[0];
 
-    const json = await oura.fetchData(`sleep?start_date=${finalStartDate}&end_date=${finalEndDate}`);
+    const json = await myOuraInstance.fetchData(`sleep?start_date=${finalStartDate}&end_date=${finalEndDate}`);
     res.json(json);
   } catch (error) {
     console.error("Error fetching data:", error);
@@ -223,7 +220,20 @@ app.get('/api/getSleepData', async (req, res) => {
 
 app.get('/api/getPersonalInfo', async(req,res) =>{
   try{
-    const personalInfo = await oura.getPersonalInfo();
+    const { ring_id } = req.query;
+    console.log(ring_id);
+    // 1. Validate
+    if (!ring_id) return res.status(400).json({ error: "Missing ring id" });
+
+    // 2. Lookup user and decrypt PAT
+    const user = db.data.users.find(u => u.id === parseInt(ring_id));
+    if (!user || !user.PAT) return res.status(404).json({ error: "User or PAT not found" });
+
+    const decryptedPAT = decrypt(user.PAT);
+
+    // 3. Create new Oura instance
+    const myOuraInstance = new Oura(decryptedPAT);
+    const personalInfo = await myOuraInstance.getPersonalInfo();
     res.json(personalInfo);
   } catch (error){
     console.error("Error loading personal info:", error);

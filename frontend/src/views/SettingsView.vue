@@ -4,11 +4,16 @@
       <!-- User List Panel -->
       <div class="user-list-panel">
         <div class="panel-header">
-          <h3>Users</h3>
+          <h3>Rings</h3>
         </div>
         <ul class="user-list">
-          <li v-for="user in users" :key="user.id" class="user-item"
-            :class="{ 'selected': selectedUser && selectedUser.id === user.id }" @click="selectUser(user)">
+          <li
+            v-for="user in users"
+            :key="user.id"
+            class="user-item"
+            :class="{ selected: selectedUser && selectedUser.id === user.id }"
+            @click="selectUser(user)"
+          >
             <div class="user-avatar">
               {{ user.nickname.charAt(0).toUpperCase() }}
             </div>
@@ -45,50 +50,49 @@
                 <label for="PAT">PAT:</label>
                 <input id="PAT" type="text" v-model="selectedUser.PAT" />
               </div>
-            
+
               <div class="form-field">
                 <label for="nickname">Nickname:</label>
                 <input id="nickname" type="text" v-model="selectedUser.nickname" />
               </div>
-            
+
               <div class="form-field">
                 <label for="email">Email:</label>
                 <input id="email" type="email" v-model="selectedUser.email" />
               </div>
-            
+
               <div class="form-field">
                 <label for="notes">Notes:</label>
                 <textarea id="notes" v-model="selectedUser.notes"></textarea>
               </div>
-            
+
               <div class="form-actions">
                 <button type="submit" class="save-btn">Save Changes</button>
               </div>
             </form>
-          
+
             <div v-else>
               <div class="form-field">
                 <label>PAT:</label>
                 <p class="field-value">{{ selectedUser.PAT || 'Not set' }}</p>
               </div>
-            
+
               <div class="form-field">
                 <label>Nickname:</label>
                 <p class="field-value">{{ selectedUser.nickname }}</p>
               </div>
-            
+
               <div class="form-field">
                 <label>Email:</label>
                 <p class="field-value">{{ selectedUser.email }}</p>
               </div>
-            
+
               <div class="form-field">
                 <label>Notes:</label>
                 <p class="field-value">{{ selectedUser.notes || 'No notes' }}</p>
               </div>
             </div>
           </div>
-        
         </div>
       </div>
     </div>
@@ -259,7 +263,7 @@
 }
 
 .details-content {
-  width:70vw;
+  width: 70vw;
   flex: 1;
   padding: 1.5rem;
   overflow-y: auto;
@@ -350,81 +354,81 @@
 
 <script>
 // Import axios for making HTTP requests
-import axios from 'axios';
-import { useToastStore } from '@/stores/toast';
+import axios from 'axios'
+import { useToastStore } from '@/stores/toast'
 
 export default {
   data() {
     return {
-      users: [],  // This will store the fetched users
-      selectedUser: null,  // Currently selected user
-      isEditing: false,  // Whether we're in edit mode
-    };
+      users: [], // This will store the fetched users
+      selectedUser: null, // Currently selected user
+      isEditing: false, // Whether we're in edit mode
+    }
   },
   mounted() {
-    this.fetchUsers();  // Call fetchUsers when component is mounted
+    this.fetchUsers() // Call fetchUsers when component is mounted
   },
   methods: {
     async fetchUsers() {
-      const toast = useToastStore();
+      const toast = useToastStore()
       try {
         // Make a GET request to the Express API
-        const response = await axios.get('http://localhost:3000/users');
-        this.users = response.data;
+        const response = await axios.get('http://localhost:3000/users')
+        this.users = response.data
         // Auto-select first user if available
         if (this.users.length > 0 && !this.selectedUser) {
-          this.selectedUser = { ...this.users[0] };
+          this.selectedUser = { ...this.users[0] }
         }
       } catch (error) {
-        console.error('Error fetching users:', error);
-        toast.show('Failed to fetch users.', 'error');
+        console.error('Error fetching users:', error)
+        toast.show('Failed to fetch users.', 'error')
       }
     },
 
     selectUser(user) {
       // Cancel editing when switching users
-      this.isEditing = false;
+      this.isEditing = false
       // Create a copy to avoid direct mutation
-      this.selectedUser = { ...user };
+      this.selectedUser = { ...user }
     },
 
     toggleEdit() {
       if (this.isEditing) {
         // If canceling edit, restore original data
-        const originalUser = this.users.find(u => u.id === this.selectedUser.id);
+        const originalUser = this.users.find((u) => u.id === this.selectedUser.id)
         if (originalUser) {
-          this.selectedUser = { ...originalUser };
+          this.selectedUser = { ...originalUser }
         }
       }
-      this.isEditing = !this.isEditing;
+      this.isEditing = !this.isEditing
     },
 
     // Method to send the PATCH request to the backend
     async updateUser(user) {
-      const toast = useToastStore();
+      const toast = useToastStore()
       // Send the PATCH request to update user data
       try {
         await axios.patch(`http://localhost:3000/users/${user.id}`, {
           PAT: user.PAT,
           nickname: user.nickname,
           email: user.email,
-          notes: user.notes
-        });
+          notes: user.notes,
+        })
 
         // Update the user in the users array
-        const userIndex = this.users.findIndex(u => u.id === user.id);
+        const userIndex = this.users.findIndex((u) => u.id === user.id)
         if (userIndex !== -1) {
-          this.users[userIndex] = { ...user };
+          this.users[userIndex] = { ...user }
         }
 
         // Exit edit mode
-        this.isEditing = false;
-        toast.show('User updated successfully!', 'success');
+        this.isEditing = false
+        toast.show('User updated successfully!', 'success')
       } catch (error) {
-        console.error('Error updating user:', error);
-        toast.show('Failed to update user.', 'error');
+        console.error('Error updating user:', error)
+        toast.show('Failed to update user.', 'error')
       }
     },
-  }
-};
+  },
+}
 </script>

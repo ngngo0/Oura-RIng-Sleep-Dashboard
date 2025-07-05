@@ -10,13 +10,13 @@
   --vt-c-indigo: #2c3e50;
 
   /* Primary theme color */
-  --vt-c-primary: #2C5F5D;
-  --vt-c-primary-light: #3D7876;
+  --vt-c-primary: #2c5f5d;
+  --vt-c-primary-light: #3d7876;
   --vt-c-primary-softer: #a9c4c3;
   --vt-c-primary-lightest: #a9c4c3a3;
-  --vt-c-primary-muted: #2C5F5Dcc;
+  --vt-c-primary-muted: #2c5f5dcc;
   --vt-c-primary-dark: #1c3f3e;
-    
+
   /* Button states */
   --btn-primary-bg: var(--vt-c-primary);
   --btn-primary-hover: var(--vt-c-primary-light);

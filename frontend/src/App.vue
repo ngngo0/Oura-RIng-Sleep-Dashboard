@@ -8,16 +8,16 @@
   </header>
 
   <RouterView />
-  <Toast/>
+  <Toast />
 </template>
 
 <style scoped>
 header {
   position: sticky;
-  height:10vh;
+  height: 10vh;
   top: 0;
   z-index: 1000;
-  background-color: #2C5F5D;
+  background-color: #2c5f5d;
   line-height: 1.5;
   display: flex;
   align-items: center;
@@ -52,7 +52,6 @@ nav a {
   display: inline-block;
   padding: 0 1rem;
   border-left: none;
-
 }
 
 /* Responsive: stack vertically on small screens */
@@ -80,8 +79,7 @@ nav a {
 }
 </style>
 
-
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router';
-import Toast from '@/components/Toast.vue';
+import { RouterLink, RouterView } from 'vue-router'
+import Toast from '@/components/Toast.vue'
 </script>

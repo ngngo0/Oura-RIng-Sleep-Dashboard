@@ -5,16 +5,16 @@ export const useSleepStore = defineStore('sleep', {
   state: () => ({
     sleepData: [] as SleepRecord[],
   }),
- actions: {
+  actions: {
     setSleepData(data: SleepRecord[]) {
-      this.sleepData = data;
-      localStorage.setItem('sleepData', JSON.stringify(data));
+      this.sleepData = data
+      localStorage.setItem('sleepData', JSON.stringify(data))
     },
     loadFromStorage() {
-      const saved = localStorage.getItem('sleepData');
+      const saved = localStorage.getItem('sleepData')
       if (saved) {
-        this.sleepData = JSON.parse(saved);
+        this.sleepData = JSON.parse(saved)
       }
-    }
-  }
+    },
+  },
 })

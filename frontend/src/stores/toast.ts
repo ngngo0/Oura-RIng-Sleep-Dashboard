@@ -14,7 +14,7 @@ export const useToastStore = defineStore('toast', {
     message: '',
     type: 'success',
     visible: false,
-    timeoutId: null
+    timeoutId: null,
   }),
 
   actions: {
@@ -31,6 +31,6 @@ export const useToastStore = defineStore('toast', {
         this.visible = false
         this.timeoutId = null
       }, duration)
-    }
-  }
+    },
+  },
 })
