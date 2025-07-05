@@ -34,3 +34,4 @@ frontend/*.tsbuildinfo
 frontend/test-results/
 frontend/playwright-report/
 .devcontainer/
+/sleepproj-deploy/
